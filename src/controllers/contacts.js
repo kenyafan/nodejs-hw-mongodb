@@ -18,7 +18,9 @@ export const getAllContacts = async (req, res) => {
 
 export const getContactById = async (req, res) => {
   const contact = await getContactByIdService(req.params.contactId);
-  if (!contact) throw createError(404, 'Contact not found');
+  if (!contact) {
+    throw createError(404, 'Contact not found');
+  }
   res.status(200).json({
     status: 200,
     message: `Successfully found contact with id ${req.params.contactId}!`,
@@ -26,18 +28,8 @@ export const getContactById = async (req, res) => {
   });
 };
 
-export const createContact = async (req, res, next) => {
-  const { name, phoneNumber, contactType } = req.body;
-
-  if (!name || !phoneNumber || !contactType) {
-    throw createError(
-      400,
-      'Missing required fields: name, phoneNumber, and contactType',
-    );
-  }
-
+export const createContact = async (req, res) => {
   const newContact = await createContactService(req.body);
-
   res.status(201).json({
     status: 201,
     message: 'Successfully created a contact!',
@@ -50,7 +42,9 @@ export const updateContact = async (req, res) => {
     req.params.contactId,
     req.body,
   );
-  if (!updatedContact) throw createError(404, 'Contact not found');
+  if (!updatedContact) {
+    throw createError(404, 'Contact not found');
+  }
   res.status(200).json({
     status: 200,
     message: 'Successfully patched a contact!',
@@ -59,6 +53,9 @@ export const updateContact = async (req, res) => {
 };
 
 export const deleteContact = async (req, res) => {
-  await deleteContactService(req.params.contactId);
+  const deletedContact = await deleteContactService(req.params.contactId);
+  if (!deletedContact) {
+    throw createError(404, 'Contact not found');
+  }
   res.status(204).send();
 };
