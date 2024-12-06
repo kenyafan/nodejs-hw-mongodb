@@ -37,7 +37,17 @@ export const createContactService = async (data) => {
 };
 
 export const updateContactService = async (id, data) => {
-  return await Contact.findByIdAndUpdate(id, data, { new: true });
+  try {
+    const updatedContact = await Contact.findByIdAndUpdate(id, data, {
+      new: true,
+      runValidators: true,
+    });
+
+    return updatedContact;
+  } catch (error) {
+    console.error('Error updating contact:', error);
+    throw new Error('Error updating contact');
+  }
 };
 
 export const deleteContactService = async (id) => {

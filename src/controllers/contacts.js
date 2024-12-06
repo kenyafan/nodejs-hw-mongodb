@@ -106,12 +106,6 @@ export const getContactById = async (req, res, next) => {
 
 export const createContact = async (req, res, next) => {
   try {
-    const { name, email, phone } = req.body;
-
-    if (!name || !email || !phone) {
-      throw createError(400, 'Name, email, and phone are required');
-    }
-
     const newContact = await createContactService(req.body);
     res.status(201).json({
       status: 201,
@@ -131,6 +125,10 @@ export const updateContact = async (req, res, next) => {
       throw createError(400, 'Invalid contact ID format');
     }
 
+    if (!Object.keys(req.body).length) {
+      throw createError(400, 'No data provided for update');
+    }
+
     const updatedContact = await updateContactService(contactId, req.body);
     if (!updatedContact) {
       throw createError(404, 'Contact not found');
@@ -138,7 +136,7 @@ export const updateContact = async (req, res, next) => {
 
     res.status(200).json({
       status: 200,
-      message: 'Successfully patched a contact!',
+      message: 'Successfully updated the contact!',
       data: updatedContact,
     });
   } catch (error) {

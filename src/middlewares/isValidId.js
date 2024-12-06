@@ -2,7 +2,8 @@ import mongoose from 'mongoose';
 import createError from 'http-errors';
 
 export const isValidId = (req, res, next) => {
-  if (!mongoose.Types.ObjectId.isValid(req.params.contactId)) {
+  const { contactId } = req.params;
+  if (!mongoose.Types.ObjectId.isValid(contactId)) {
     return next(createError(400, 'Invalid ID format'));
   }
   next();
