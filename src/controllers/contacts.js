@@ -9,67 +9,30 @@ import {
 
 export const getAllContacts = async (req, res, next) => {
   try {
-    let {
-      page = 1,
-      perPage = 10,
-      sortBy = 'name',
-      sortOrder = 'asc',
-      type,
-      isFavourite,
-    } = req.query;
+    const userId = req.user._id;
+    const { page, perPage, sortBy, sortOrder, type, isFavourite } = req.query;
 
-    page = Math.max(Number(page), 1);
-    perPage = Math.max(Number(perPage), 1);
-
-    if (isNaN(page) || isNaN(perPage)) {
-      throw createError(400, 'Page and perPage must be valid numbers');
-    }
-
-    if (!['asc', 'desc'].includes(sortOrder)) {
-      throw createError(400, 'sortOrder must be "asc" or "desc"');
-    }
-
-    const filters = {};
-
+    const filters = { userId };
     if (type) filters.contactType = type;
     if (isFavourite !== undefined) {
-      if (isFavourite !== 'true' && isFavourite !== 'false') {
-        throw createError(400, 'isFavourite must be "true" or "false"');
-      }
       filters.isFavourite = isFavourite === 'true';
     }
 
     const { contacts, totalItems, totalPages } = await getAllContactsService({
-      page,
-      perPage,
+      page: Number(page),
+      perPage: Number(perPage),
       sortBy,
       sortOrder,
       filters,
     });
 
-    if (!contacts || contacts.length === 0) {
-      return res.status(200).json({
-        status: 200,
-        message: 'No contacts found.',
-        data: {
-          data: [],
-          page,
-          perPage,
-          totalItems: 0,
-          totalPages: 0,
-          hasPreviousPage: false,
-          hasNextPage: false,
-        },
-      });
-    }
-
     res.status(200).json({
-      status: 200,
+      status: 'success',
       message: 'Successfully found contacts!',
       data: {
-        data: contacts,
-        page,
-        perPage,
+        contacts,
+        page: Number(page),
+        perPage: Number(perPage),
         totalItems,
         totalPages,
         hasPreviousPage: page > 1,
@@ -83,20 +46,17 @@ export const getAllContacts = async (req, res, next) => {
 
 export const getContactById = async (req, res, next) => {
   try {
+    const userId = req.user._id;
     const { contactId } = req.params;
 
-    if (!contactId.match(/^[0-9a-fA-F]{24}$/)) {
-      throw createError(400, 'Invalid contact ID format');
-    }
-
-    const contact = await getContactByIdService(contactId);
+    const contact = await getContactByIdService(contactId, userId);
     if (!contact) {
       throw createError(404, 'Contact not found');
     }
 
     res.status(200).json({
-      status: 200,
-      message: `Successfully found contact with id ${contactId}!`,
+      status: 'success',
+      message: 'Successfully found the contact!',
       data: contact,
     });
   } catch (error) {
@@ -106,9 +66,11 @@ export const getContactById = async (req, res, next) => {
 
 export const createContact = async (req, res, next) => {
   try {
-    const newContact = await createContactService(req.body);
+    const userId = req.user._id;
+    const newContact = await createContactService({ ...req.body, userId });
+
     res.status(201).json({
-      status: 201,
+      status: 'success',
       message: 'Successfully created a contact!',
       data: newContact,
     });
@@ -119,23 +81,20 @@ export const createContact = async (req, res, next) => {
 
 export const updateContact = async (req, res, next) => {
   try {
+    const userId = req.user._id;
     const { contactId } = req.params;
 
-    if (!contactId.match(/^[0-9a-fA-F]{24}$/)) {
-      throw createError(400, 'Invalid contact ID format');
-    }
-
-    if (!Object.keys(req.body).length) {
-      throw createError(400, 'No data provided for update');
-    }
-
-    const updatedContact = await updateContactService(contactId, req.body);
+    const updatedContact = await updateContactService(
+      contactId,
+      userId,
+      req.body,
+    );
     if (!updatedContact) {
       throw createError(404, 'Contact not found');
     }
 
     res.status(200).json({
-      status: 200,
+      status: 'success',
       message: 'Successfully updated the contact!',
       data: updatedContact,
     });
@@ -146,13 +105,10 @@ export const updateContact = async (req, res, next) => {
 
 export const deleteContact = async (req, res, next) => {
   try {
+    const userId = req.user._id;
     const { contactId } = req.params;
 
-    if (!contactId.match(/^[0-9a-fA-F]{24}$/)) {
-      throw createError(400, 'Invalid contact ID format');
-    }
-
-    const deletedContact = await deleteContactService(contactId);
+    const deletedContact = await deleteContactService(contactId, userId);
     if (!deletedContact) {
       throw createError(404, 'Contact not found');
     }
