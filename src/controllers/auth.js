@@ -2,6 +2,7 @@ import { register } from '../services/auth.js';
 import { login } from '../services/auth.js';
 import { refreshSession as refreshSessionService } from '../services/auth.js';
 import { logout } from '../services/auth.js';
+import createHttpError from 'http-errors';
 
 export const registerUser = async (req, res, next) => {
   try {
@@ -45,11 +46,20 @@ export const loginUser = async (req, res, next) => {
 export const refreshSession = async (req, res, next) => {
   try {
     const { refreshToken } = req.cookies;
+
     if (!refreshToken) {
       throw createHttpError(401, 'Refresh token is missing');
     }
 
-    const { accessToken } = await refreshSessionService(refreshToken);
+    const { accessToken, refreshToken: newRefreshToken } =
+      await refreshSessionService(refreshToken);
+
+    res.cookie('refreshToken', newRefreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 30 * 24 * 60 * 60 * 1000,
+    });
 
     res.status(200).json({
       status: 'success',
@@ -64,14 +74,18 @@ export const refreshSession = async (req, res, next) => {
 export const logoutUser = async (req, res, next) => {
   try {
     const { refreshToken } = req.cookies;
+
     if (!refreshToken) {
       throw createHttpError(401, 'Refresh token is missing');
     }
 
     await logout(refreshToken);
 
-    res.clearCookie('refreshToken', { httpOnly: true });
-    res.status(204).send();
+    res.clearCookie('refreshToken', { httpOnly: true, sameSite: 'strict' });
+    res.status(200).json({
+      status: 'success',
+      message: 'Successfully logged out!',
+    });
   } catch (error) {
     next(error);
   }
