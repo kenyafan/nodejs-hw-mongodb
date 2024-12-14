@@ -11,7 +11,7 @@ export const registerUser = async (req, res, next) => {
     const user = await register({ name, email, password });
 
     res.status(201).json({
-      status: 'success',
+      status: 201,
       message: 'Successfully registered a user!',
       data: { id: user._id, name: user.name, email: user.email },
     });
@@ -34,7 +34,7 @@ export const loginUser = async (req, res, next) => {
     });
 
     res.status(200).json({
-      status: 'success',
+      status: 200,
       message: 'Successfully logged in a user!',
       data: { accessToken },
     });
@@ -62,7 +62,7 @@ export const refreshSession = async (req, res, next) => {
     });
 
     res.status(200).json({
-      status: 'success',
+      status: 200,
       message: 'Successfully refreshed a session!',
       data: { accessToken },
     });
@@ -82,10 +82,7 @@ export const logoutUser = async (req, res, next) => {
     await logout(refreshToken);
 
     res.clearCookie('refreshToken', { httpOnly: true, sameSite: 'strict' });
-    res.status(200).json({
-      status: 'success',
-      message: 'Successfully logged out!',
-    });
+    res.status(204).send(); // No content
   } catch (error) {
     next(error);
   }
