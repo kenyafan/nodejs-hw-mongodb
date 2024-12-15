@@ -27,7 +27,7 @@ export const getAllContacts = async (req, res, next) => {
     });
 
     res.status(200).json({
-      status: 'success',
+      status: 200,
       message: 'Successfully found contacts!',
       data: {
         contacts,
@@ -55,7 +55,7 @@ export const getContactById = async (req, res, next) => {
     }
 
     res.status(200).json({
-      status: 'success',
+      status: 200,
       message: 'Successfully found the contact!',
       data: contact,
     });
@@ -70,7 +70,7 @@ export const createContact = async (req, res, next) => {
     const newContact = await createContactService({ ...req.body, userId });
 
     res.status(201).json({
-      status: 'success',
+      status: 201,
       message: 'Successfully created a contact!',
       data: newContact,
     });
@@ -94,7 +94,7 @@ export const updateContact = async (req, res, next) => {
     }
 
     res.status(200).json({
-      status: 'success',
+      status: 200,
       message: 'Successfully updated the contact!',
       data: updatedContact,
     });
