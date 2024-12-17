@@ -67,10 +67,16 @@ export const getContactById = async (req, res, next) => {
 export const createContact = async (req, res, next) => {
   try {
     const userId = req.user._id;
-    const newContact = await createContactService({ ...req.body, userId });
+    const photo = req.file ? req.file.path : null;
+
+    const newContact = await createContactService({
+      ...req.body,
+      userId,
+      photo,
+    });
 
     res.status(201).json({
-      status: 201,
+      status: 'success',
       message: 'Successfully created a contact!',
       data: newContact,
     });
@@ -83,18 +89,19 @@ export const updateContact = async (req, res, next) => {
   try {
     const userId = req.user._id;
     const { contactId } = req.params;
+    const photo = req.file ? req.file.path : undefined;
 
-    const updatedContact = await updateContactService(
-      contactId,
-      userId,
-      req.body,
-    );
+    const updatedContact = await updateContactService(contactId, userId, {
+      ...req.body,
+      ...(photo && { photo }),
+    });
+
     if (!updatedContact) {
       throw createError(404, 'Contact not found');
     }
 
     res.status(200).json({
-      status: 200,
+      status: 'success',
       message: 'Successfully updated the contact!',
       data: updatedContact,
     });
