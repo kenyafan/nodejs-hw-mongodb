@@ -9,6 +9,8 @@ import contactsRouter from './routers/contacts.js';
 import authRouter from './routers/auth.js';
 import cookieParser from 'cookie-parser';
 
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+
 const transport = pino.transport({
   target: 'pino-pretty',
   options: { translateTime: 'SYS:standard', ignore: 'pid,hostname' },

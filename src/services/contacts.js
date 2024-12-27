@@ -1,4 +1,5 @@
 import { Contact } from '../models/contact.js';
+import { uploadToCloudinary } from '../utils/cloudinary.js';
 
 export const getAllContactsService = async ({
   page = 1,
@@ -33,12 +34,27 @@ export const getContactByIdService = async (id, userId) => {
   return await Contact.findOne({ _id: id, userId });
 };
 
-export const createContactService = async (data) => {
-  return await Contact.create(data);
+export const createContactService = async (data, file) => {
+  try {
+    if (file) {
+      const uploadedPhoto = await uploadToCloudinary(file);
+      data.photo = uploadedPhoto.url;
+    }
+
+    return await Contact.create(data);
+  } catch (error) {
+    console.error('Error creating contact:', error);
+    throw new Error('Error creating contact');
+  }
 };
 
-export const updateContactService = async (id, userId, data) => {
+export const updateContactService = async (id, userId, data, file) => {
   try {
+    if (file) {
+      const uploadedPhoto = await uploadToCloudinary(file);
+      data.photo = uploadedPhoto.url;
+    }
+
     const updatedContact = await Contact.findOneAndUpdate(
       { _id: id, userId },
       data,

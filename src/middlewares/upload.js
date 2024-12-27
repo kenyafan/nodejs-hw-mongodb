@@ -1,15 +1,18 @@
-import multer from 'multer';
-import { CloudinaryStorage } from 'multer-storage-cloudinary';
-import cloudinary from '../config/cloudinary.js';
+import path from 'node:path';
 
-const storage = new CloudinaryStorage({
-  cloudinary,
-  params: {
-    folder: 'contacts',
-    allowed_formats: ['jpg', 'jpeg', 'png'],
+import multer from 'multer';
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, path.resolve('src', 'tmp'));
+  },
+  filename: function (req, file, cb) {
+    const uniquePrefix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+
+    cb(null, `${uniquePrefix}_${file.originalname}`);
   },
 });
 
 const upload = multer({ storage });
 
-export default upload;
+export { upload };

@@ -3,6 +3,10 @@ import { login } from '../services/auth.js';
 import { refreshSession as refreshSessionService } from '../services/auth.js';
 import { logout } from '../services/auth.js';
 import createHttpError from 'http-errors';
+import { User } from '../models/User.js';
+import jwt from 'jsonwebtoken';
+import nodemailer from 'nodemailer';
+import bcrypt from 'bcrypt';
 
 export const registerUser = async (req, res, next) => {
   try {
@@ -94,12 +98,14 @@ export const sendResetEmail = async (req, res, next) => {
 
     const user = await User.findOne({ email });
     if (!user) {
-      throw createHttpError(404, 'User not found!');
+      return next(createHttpError(404, 'User not found!'));
     }
 
-    const token = jwt.sign({ email: user.email }, process.env.JWT_SECRET, {
-      expiresIn: '5m',
-    });
+    const token = jwt.sign(
+      { sub: user._id, email: user.email },
+      process.env.JWT_SECRET,
+      { expiresIn: '15m' },
+    );
 
     const resetLink = `${process.env.APP_DOMAIN}/reset-password?token=${token}`;
 
@@ -112,12 +118,16 @@ export const sendResetEmail = async (req, res, next) => {
       },
     });
 
-    await transporter.sendMail({
+    const mailOptions = {
       from: process.env.SMTP_FROM,
       to: user.email,
       subject: 'Password Reset',
       html: `<p>Click the link below to reset your password:</p><a href="${resetLink}">${resetLink}</a>`,
-    });
+    };
+
+    const info = await transporter.sendMail(mailOptions);
+
+    console.log('Email sent: ' + info.response);
 
     res.status(200).json({
       status: 200,
@@ -125,12 +135,12 @@ export const sendResetEmail = async (req, res, next) => {
       data: {},
     });
   } catch (error) {
+    console.error('Error occurred:', error);
     next(
       createHttpError(500, 'Failed to send the email, please try again later.'),
     );
   }
 };
-
 export const resetPassword = async (req, res, next) => {
   try {
     const { token, password } = req.body;
