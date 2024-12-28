@@ -20,7 +20,7 @@ router.use(authenticate);
 router.get('/', ctrlWrapper(getAllContacts));
 router.get('/:contactId', isValidId, ctrlWrapper(getContactById));
 router.post(
-  '/contacts',
+  '/',
   validateBody(contactSchema),
   upload.single('photo'),
   ctrlWrapper(createContact),

@@ -1,13 +1,13 @@
 import Joi from 'joi';
 
 export const contactSchema = Joi.object({
-  name: Joi.string().min(3).max(20).required().messages({
+  name: Joi.string().min(3).max(20).messages({
     'string.empty': '"name" cannot be empty',
     'string.min': '"name" should have at least 3 characters',
     'string.max': '"name" should not exceed 20 characters',
     'any.required': '"name" is required',
   }),
-  phoneNumber: Joi.string().min(3).max(20).required().messages({
+  phoneNumber: Joi.string().min(3).max(20).messages({
     'string.empty': '"phoneNumber" cannot be empty',
     'string.min': '"phoneNumber" should have at least 3 characters',
     'string.max': '"phoneNumber" should not exceed 20 characters',
@@ -20,7 +20,7 @@ export const contactSchema = Joi.object({
   isFavourite: Joi.boolean().messages({
     'boolean.base': '"isFavourite" must be a boolean value',
   }),
-  contactType: Joi.string().min(3).max(20).required().messages({
+  contactType: Joi.string().min(3).max(20).messages({
     'string.empty': '"contactType" cannot be empty',
     'string.min': '"contactType" should have at least 3 characters',
     'string.max': '"contactType" should not exceed 20 characters',
