@@ -8,6 +8,8 @@ import { notFoundHandler } from './middlewares/notFoundHandler.js';
 import contactsRouter from './routers/contacts.js';
 import authRouter from './routers/auth.js';
 import cookieParser from 'cookie-parser';
+import swaggerUi from 'swagger-ui-express';
+import swaggerDocument from '../docs/swagger.json' assert { type: 'json' };
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
@@ -18,8 +20,6 @@ const transport = pino.transport({
 const logger = pinoHttp({ logger: pino(transport) });
 
 const app = express();
-const swaggerUi = require('swagger-ui-express');
-const swaggerDocument = require('./docs/swagger.json');
 
 app.use(cors());
 app.use(express.json());
