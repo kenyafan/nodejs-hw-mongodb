@@ -18,6 +18,8 @@ const transport = pino.transport({
 const logger = pinoHttp({ logger: pino(transport) });
 
 const app = express();
+const swaggerUi = require('swagger-ui-express');
+const swaggerDocument = require('./docs/swagger.json');
 
 app.use(cors());
 app.use(express.json());
@@ -26,6 +28,7 @@ app.use(cookieParser());
 
 app.use('/auth', authRouter);
 app.use('/contacts', contactsRouter);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.use(notFoundHandler);
 app.use(errorHandler);
