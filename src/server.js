@@ -1,3 +1,5 @@
+import * as fs from 'node:fs';
+import path from 'node:path';
 import express from 'express';
 import cors from 'cors';
 import 'dotenv/config';
@@ -8,8 +10,7 @@ import { notFoundHandler } from './middlewares/notFoundHandler.js';
 import contactsRouter from './routers/contacts.js';
 import authRouter from './routers/auth.js';
 import cookieParser from 'cookie-parser';
-import swaggerUi from 'swagger-ui-express';
-import swaggerDocument from '../docs/swagger.json' assert { type: 'json' };
+import swaggerUI from 'swagger-ui-express';
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
@@ -18,6 +19,10 @@ const transport = pino.transport({
   options: { translateTime: 'SYS:standard', ignore: 'pid,hostname' },
 });
 const logger = pinoHttp({ logger: pino(transport) });
+
+const swaggerDocument = JSON.parse(
+  fs.readFileSync(path.resolve('docs/swagger.json'), 'utf-8'),
+);
 
 const app = express();
 
@@ -28,7 +33,7 @@ app.use(cookieParser());
 
 app.use('/auth', authRouter);
 app.use('/contacts', contactsRouter);
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerDocument));
 
 app.use(notFoundHandler);
 app.use(errorHandler);
