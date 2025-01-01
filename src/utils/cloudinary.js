@@ -11,7 +11,9 @@ export const uploadToCloudinary = async (file) => {
     const result = await cloudinary.uploader.upload(file.path, {
       folder: 'contacts',
       use_filename: true,
+      resource_type: 'image',
     });
+
     return { url: result.secure_url, public_id: result.public_id };
   } catch (error) {
     console.error('Cloudinary upload error:', error);

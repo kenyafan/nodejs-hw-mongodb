@@ -6,6 +6,8 @@ import {
   updateContactService,
   deleteContactService,
 } from '../services/contacts.js';
+import { uploadToCloudinary } from '../utils/cloudinary.js';
+import fs from 'fs/promises';
 
 export const getAllContacts = async (req, res, next) => {
   try {
@@ -67,12 +69,19 @@ export const getContactById = async (req, res, next) => {
 export const createContact = async (req, res, next) => {
   try {
     const userId = req.user._id;
-    const photo = req.file ? req.file.path : null;
+    let photoUrl = null;
+
+    if (req.file) {
+      const uploadResult = await uploadToCloudinary(req.file);
+      photoUrl = uploadResult.url;
+
+      await fs.unlink(req.file.path);
+    }
 
     const newContact = await createContactService({
       ...req.body,
       userId,
-      photo,
+      photo: photoUrl,
     });
 
     res.status(201).json({
@@ -89,11 +98,18 @@ export const updateContact = async (req, res, next) => {
   try {
     const userId = req.user._id;
     const { contactId } = req.params;
-    const photo = req.file ? req.file.path : undefined;
+    let photoUrl;
+
+    if (req.file) {
+      const uploadResult = await uploadToCloudinary(req.file);
+      photoUrl = uploadResult.url;
+
+      await fs.unlink(req.file.path);
+    }
 
     const updatedContact = await updateContactService(contactId, userId, {
       ...req.body,
-      ...(photo && { photo }),
+      ...(photoUrl && { photo: photoUrl }),
     });
 
     if (!updatedContact) {
